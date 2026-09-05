@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Local state (never commit sessions, audio, secrets)
+.museglass/
+*.db
+*.sqlite
+*.wav
+*.pcm
+.env
+.env.*
+!.env.example
+*.log
+
+# Node (Android/TS tooling)
+node_modules/
+
+# Android
+apps/android/.gradle/
+apps/android/build/
+apps/android/**/build/
+apps/android/local.properties
+*.keystore
+*.jks
+
+# OS
+.DS_Store

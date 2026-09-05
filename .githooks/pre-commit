@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Commit Continuity Protocol fallback: blocks commits made outside Claude Code that skip the
+# project record. Install with scripts/install-git-hooks.sh (sets core.hooksPath).
+set -euo pipefail
+status_doc="docs/PROJECT_STATUS.md"
+ledger_doc="docs/PROJECT_LEDGER.md"
+staged="$(git diff --cached --name-only)"
+problems=()
+for doc in "$status_doc" "$ledger_doc"; do
+  [[ -s "$doc" ]] || problems+=("$doc is missing or empty")
+  grep -qx "$doc" <<<"$staged" || problems+=("$doc is not staged for this commit")
+done
+if grep -qE '(^|/)(\.env(\..*)?|id_rsa|id_ed25519|credentials(\.json)?|.*\.pem|.*\.key)$' <<<"$staged"; then
+  problems+=("a secret-looking file is staged")
+fi
+if grep -qE '(^|/)(\.venv|node_modules|__pycache__|\.pytest_cache)/' <<<"$staged"; then
+  problems+=("a virtualenv/cache/dependency directory is staged")
+fi
+if ((${#problems[@]})); then
+  echo "BLOCKED by the Commit Continuity Protocol:" >&2
+  for p in "${problems[@]}"; do echo "  - $p" >&2; done
+  exit 1
+fi
